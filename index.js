@@ -15,13 +15,14 @@ let components = [];
 function draw(elapsedTime) {
     if (elapsedTime == null) elapsedTime = 0;
     ctx.clearRect(-canvas.width / 2, -canvas.height / 2, canvas.width, canvas.height);
+    drawBoardHoles();
     components.forEach(component => {
         component.draw();
     });
 }
 
 class Component {
-    constructor(width, height) {
+    constructor(width, height, storedList) {
         this.width = width;
         this.height = height;
         this.positionX = 0;
@@ -29,47 +30,51 @@ class Component {
 
         this.grabbingPositionX = null;
         this.grabbingPositionY = null;
-        components.push(this);
+        this.storedList = storedList;
+        if (storedList) storedList.push(this);
     }
     draw() {
-        ctx.fillStyle = "#000"
+        ctx.fillStyle = "#222"
         ctx.beginPath();
-        ctx.rect(this.getTranslatedCanvasX(), this.getTranslatedCanvasY(), this.width * zoom, this.height * zoom);
+        ctx.rect(getTranslatedCanvasX(this.positionX), getTranslatedCanvasY(this.positionY), this.width * zoom, this.height * zoom);
         ctx.fill();
     }
     isHovered(x, y) {
-        let canvasX = this.getCanvasX();
-        let canvasY = this.getCanvasY();
+        let canvasX = getCanvasX(this.positionX);
+        let canvasY = getCanvasY(this.positionY);
         let canvasWidth = this.width * zoom;
         let canvasHeight = this.height * zoom;
 
         if (x > canvasX && x < canvasX + canvasWidth && y > canvasY && y < canvasY + canvasHeight) return true;
         else return false;
     }
-    getTranslatedCanvasX() { return this.positionX * zoom - viewX * zoom }
-    getTranslatedCanvasY() { return this.positionY * zoom - viewY * zoom }
-    getCanvasX() { return this.getTranslatedCanvasX() + canvas.clientWidth / 2 }
-    getCanvasY() { return this.getTranslatedCanvasY() + canvas.clientHeight / 2 }
-
-
     move(mouseX, mouseY) {
         if (this.grabbingPositionX == null || this.grabbingPositionY == null) {
             this.grabbingPositionX = hoveredPositionX(mouseX) - this.positionX;
             this.grabbingPositionY = hoveredPositionY(mouseY) - this.positionY;
         } else {
-            this.positionX = hoveredPositionX(mouseX) - this.grabbingPositionX;
-            this.positionY = hoveredPositionY(mouseY) - this.grabbingPositionY;
+            this.positionX = Math.round(hoveredPositionX(mouseX) - this.grabbingPositionX);
+            this.positionY = Math.round(hoveredPositionY(mouseY) - this.grabbingPositionY);
         }
     }
     putDown() {
         this.grabbingPositionX = null;
         this.grabbingPositionY = null;
     }
+    rotateClockwise() {
+        let width = this.width;
+        this.width = this.height;
+        this.height = width;
+        this.positionX -= (this.width - this.height) / 2;
+        this.positionY += (this.width - this.height) / 2
+        draw();
+    }
 
     destroy() {
-        components.forEach((component, index) => {
+        if (!this.storedList) return false;
+        this.storedList.forEach((component, index) => {
             if (component == this) {
-                components.splice(index, 1);
+                this.storedList.splice(index, 1);
                 draw();
                 return true;
             }
@@ -78,98 +83,48 @@ class Component {
     }
 }
 
-function hoveredPositionX(canvasX) {
-    return canvasX / zoom + viewX - canvas.clientWidth / (2 * zoom);
-}
-function hoveredPositionY(canvasY) {
-    return canvasY / zoom + viewY - canvas.clientHeight / (2 * zoom);
-}
+class Chip extends Component {
+    draw() {
+        ctx.fillStyle = "#222"
+        ctx.beginPath();
+        ctx.rect(getTranslatedCanvasX(this.positionX - 0.5), getTranslatedCanvasY(this.positionY + 0.1), this.width * zoom, (this.height - 0.2) * zoom);
+        ctx.fill();
 
-addEventListener('wheel', (event) => {
-    zoom *= 1 - (event.deltaY * 0.001);
-    draw();
-});
-let startingNavigationX;
-let startingNavigationY;
-let navigating = false;
-let activeComponent = null;
-let movingComponent = null;
-addEventListener("mousedown", (event) => {
-    if (event.button == 1 || event.button == 2) {
-        navigating = true;
-        document.body.style.cursor = 'all-scroll';
-    } else if (event.button == 0) {
-        components.forEach(component => {
-            if (component.isHovered(event.clientX, event.clientY)) {
-                movingComponent = component;
-                activeComponent = movingComponent;
-                return;
-            }
-        });
-    }
-});
-addEventListener("mouseup", (event) => {
-    if (navigating) {
-        navigating = false;
-        startingNavigationX = null;
-        startingNavigationY = null;
-        document.body.style.cursor = 'default';
-    } else if (movingComponent) {
-        movingComponent.putDown();
-        movingComponent = null;
-        document.body.style.cursor = 'pointer';
-    }
-})
-addEventListener("mousemove", (event) => {
-    if (navigating) {
-        if (startingNavigationX == null) {
-            startingNavigationX = event.clientX;
-            startingNavigationY = event.clientY;
+        ctx.fillStyle = "#888";
+        let pinWidth = 0.4;
+        for (let i = 0; i < this.width; i++) {
+            ctx.beginPath();
+            ctx.rect(getTranslatedCanvasX(this.positionX + i - pinWidth / 2), getTranslatedCanvasY(this.positionY - pinWidth / 2), pinWidth * zoom, pinWidth * zoom);
+            ctx.rect(getTranslatedCanvasX(this.positionX + i - pinWidth / 2), getTranslatedCanvasY(this.positionY + this.height - pinWidth / 2), pinWidth * zoom, pinWidth * zoom);
+
+            ctx.fill();
         }
-        viewX -= (event.clientX - startingNavigationX) / zoom;
-        viewY -= (event.clientY - startingNavigationY) / zoom;
-        startingNavigationX = event.clientX;
-        startingNavigationY = event.clientY;
-        draw();
-
-    } else if (movingComponent) {
-        movingComponent.move(event.clientX, event.clientY)
-        console.log("hi")
-        draw();
-
-    } else {
-        document.body.style.cursor = 'default';
-        components.forEach(component => {
-            if (component.isHovered(event.clientX, event.clientY)) {
-                document.body.style.cursor = 'pointer';
-            }
-        });
     }
-
-})
-addEventListener("contextmenu", (event) => {
-    if (event.stopPropagation) event.stopPropagation();
-    event.preventDefault()
-    event.cancelBubble = true;
-    return false;
-})
-
-
-let test = new Component(15, 8);
-let test2 = new Component(8, 15)
-test2.positionX = 4;
-test2.positionY = 10;
-draw();
-
-function showStats() {
-    let text1 = `navigating: ${navigating}`
-    let text2 = `movingComponent: ${movingComponent}`;
-    ctx.font = '24px serif';
-    ctx.clearRect(-canvas.width / 2, -canvas.height / 2, 400, 70);
-    ctx.fillText(text1, 10 - canvas.clientWidth / 2, 30 - canvas.clientHeight / 2);
-    ctx.fillText(text2, 10 - canvas.clientWidth / 2, 60 - canvas.clientHeight / 2);
-
-    requestAnimationFrame(showStats)
 }
-showStats();
 
+function getTranslatedCanvasX(positionX) { return positionX * zoom - viewX * zoom }
+function getTranslatedCanvasY(positionY) { return positionY * zoom - viewY * zoom }
+function getCanvasX(positionX) { return getTranslatedCanvasX(positionX) + canvas.clientWidth / 2 }
+function getCanvasY(positionY) { return getTranslatedCanvasY(positionY) + canvas.clientHeight / 2 }
+
+
+function drawBoardHoles() {
+    visibleBoardWidth = hoveredPositionX(canvas.width) - hoveredPositionX(0);
+    visibleBoardHeight = hoveredPositionY(canvas.height) - hoveredPositionY(0);
+
+    ctx.fillStyle = "#000"
+    ctx.lineWidth = Math.round(0.1 * zoom);
+
+    let leftMostHolePosition = Math.floor(hoveredPositionX(0));
+    let topHolePosition = Math.floor(hoveredPositionY(0));
+    for (let i = 0; i <= visibleBoardWidth + 1; i++) {
+        let x = i + leftMostHolePosition;
+        let canvasX = getTranslatedCanvasX(x);
+        for (let j = 0; j <= visibleBoardHeight + 1; j++) {
+            let y = j + topHolePosition;
+            ctx.beginPath();
+            ctx.arc(canvasX, getTranslatedCanvasY(y), 0.12 * zoom, 0, Math.PI * 2)
+            ctx.fill();
+        }
+    }
+}
