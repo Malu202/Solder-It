@@ -66,7 +66,14 @@ class Component {
         this.width = this.height;
         this.height = width;
         this.positionX -= (this.width - this.height) / 2;
-        this.positionY += (this.width - this.height) / 2
+        this.positionY += (this.width - this.height) / 2;
+        if (this.height > this.width) {
+            this.positionX = Math.floor(this.positionX);
+            this.positionY = Math.floor(this.positionY);
+        } else {
+            this.positionX = Math.ceil(this.positionX);
+            this.positionY = Math.ceil(this.positionY);
+        }
         draw();
     }
 
@@ -84,24 +91,52 @@ class Component {
 }
 
 class Chip extends Component {
+    constructor(width, height, storedList, pinNames) {
+        super(width, height, storedList);
+        this.pinNames = pinNames;
+        if (!this.pinNames) this.pinNames = [];
+    }
     draw() {
         ctx.fillStyle = "#222"
         ctx.beginPath();
-        ctx.rect(getTranslatedCanvasX(this.positionX - 0.5), getTranslatedCanvasY(this.positionY + 0.1), this.width * zoom, (this.height - 0.2) * zoom);
+        if (this.width > this.height) ctx.rect(getTranslatedCanvasX(this.positionX - 0.5), getTranslatedCanvasY(this.positionY + 0.1), this.width * zoom, (this.height - 0.2) * zoom);
+        else ctx.rect(getTranslatedCanvasX(this.positionX + 0.1), getTranslatedCanvasY(this.positionY - 0.5), (this.width - 0.2) * zoom, this.height * zoom); //passe
         ctx.fill();
 
-        ctx.fillStyle = "#888";
+        ctx.font = zoom * 0.4 + 'px serif';
+        ctx.textAlign = "center";
+        ctx.textBaseline = "middle";
         let pinWidth = 0.4;
-        for (let i = 0; i < this.width; i++) {
-            ctx.beginPath();
-            ctx.rect(getTranslatedCanvasX(this.positionX + i - pinWidth / 2), getTranslatedCanvasY(this.positionY - pinWidth / 2), pinWidth * zoom, pinWidth * zoom);
-            ctx.rect(getTranslatedCanvasX(this.positionX + i - pinWidth / 2), getTranslatedCanvasY(this.positionY + this.height - pinWidth / 2), pinWidth * zoom, pinWidth * zoom);
+        if (this.width > this.height) {
+            for (let i = 0; i < this.width; i++) {
+                ctx.fillStyle = "#888";
 
-            ctx.fill();
+                ctx.beginPath();
+                ctx.rect(getTranslatedCanvasX(this.positionX + i - pinWidth / 2), getTranslatedCanvasY(this.positionY - pinWidth / 2), pinWidth * zoom, pinWidth * zoom);
+                ctx.rect(getTranslatedCanvasX(this.positionX + i - pinWidth / 2), getTranslatedCanvasY(this.positionY + this.height - pinWidth / 2), pinWidth * zoom, pinWidth * zoom);
+                ctx.fill();
+
+                ctx.fillStyle = "#FFF"
+                if (this.pinNames[2 * this.width - i - 1]) ctx.fillText(this.pinNames[2 * this.width - i - 1], getTranslatedCanvasX(this.positionX + i), getTranslatedCanvasY(this.positionY + 0.7));
+                if (this.pinNames[i]) ctx.fillText(this.pinNames[i], getTranslatedCanvasX(this.positionX + i), getTranslatedCanvasY(this.positionY + this.height - 0.7));
+            }
+        } else {
+            for (let j = 0; j < this.height; j++) {
+                ctx.fillStyle = "#888";
+
+                ctx.beginPath();
+                ctx.rect(getTranslatedCanvasX(this.positionX - pinWidth / 2), getTranslatedCanvasY(this.positionY + j - pinWidth / 2), pinWidth * zoom, pinWidth * zoom);
+                ctx.rect(getTranslatedCanvasX(this.positionX + this.width - pinWidth / 2), getTranslatedCanvasY(this.positionY + j - pinWidth / 2), pinWidth * zoom, pinWidth * zoom);
+                ctx.fill();
+
+                ctx.fillStyle = "#FFF"
+                if (this.pinNames[j]) ctx.fillText(this.pinNames[j], getTranslatedCanvasX(this.positionX + 0.7), getTranslatedCanvasY(this.positionY + j));
+                if (this.pinNames[2 * this.height - j - 1]) ctx.fillText(this.pinNames[2 * this.height - j - 1], getTranslatedCanvasX(this.positionX + this.width - 0.7), getTranslatedCanvasY(this.positionY + j));
+
+            }
         }
     }
 }
-
 function getTranslatedCanvasX(positionX) { return positionX * zoom - viewX * zoom }
 function getTranslatedCanvasY(positionY) { return positionY * zoom - viewY * zoom }
 function getCanvasX(positionX) { return getTranslatedCanvasX(positionX) + canvas.clientWidth / 2 }
