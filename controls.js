@@ -5,9 +5,13 @@ function hoveredPositionY(canvasY) {
     return canvasY / zoom + viewY - canvas.clientHeight / (2 * zoom);
 }
 
+let lastAnimationRequest;
 addEventListener('wheel', (event) => {
+    // if (lastAnimationRequest) window.cancelAnimationFrame(lastAnimationRequest)
     zoom *= 1 - (event.deltaY * 0.001);
-    draw();
+    createBoardHoles();
+    // requestAnimationFrame(drawOnce);
+    drawOnce();
 });
 let startingNavigationX;
 let startingNavigationY;
@@ -27,6 +31,8 @@ addEventListener("mousedown", (event) => {
             }
         });
     }
+    console.log("calling start drawing");
+    startDrawing();
 });
 addEventListener("mouseup", (event) => {
     if (navigating) {
@@ -39,6 +45,7 @@ addEventListener("mouseup", (event) => {
         movingComponent = null;
         document.body.style.cursor = 'pointer';
     }
+    stopDrawing();
 })
 addEventListener("mousemove", (event) => {
     if (navigating) {
@@ -50,11 +57,11 @@ addEventListener("mousemove", (event) => {
         viewY -= (event.clientY - startingNavigationY) / zoom;
         startingNavigationX = event.clientX;
         startingNavigationY = event.clientY;
-        draw();
+        // drawOnce();
 
     } else if (movingComponent) {
         movingComponent.move(event.clientX, event.clientY)
-        draw();
+        // drawOnce();
 
     } else {
         document.body.style.cursor = 'default';
@@ -74,12 +81,12 @@ addEventListener("contextmenu", (event) => {
 })
 addEventListener("keydown", event => {
     switch (event.keyCode) {
-        case 46:
+        case 46: //"entf"
             if (!activeComponent) break;
             activeComponent.destroy();
             activeComponent = null;
             break;
-        case 82:
+        case 82: //"R"
             if (!activeComponent) break;
             activeComponent.rotateClockwise();
             break;

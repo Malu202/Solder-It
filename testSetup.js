@@ -10,19 +10,23 @@ test3.positionY = -8;
 let test4 = new Chip(4, 8, components, null)
 test4.positionX = -10;
 test4.positionY = -1;
-draw();
+drawOnce();
 
-function showStats() {
+function drawStats() {
     let text1 = `navigating: ${navigating}`
     let text2 = `movingComponent: ${movingComponent}`;
+    let text3 = `drawLoop: ${drawLoop}`;
+
     ctx.font = '24px serif';
     ctx.fillStyle = "#000";
     ctx.textAlign = "left";
     ctx.textBaseline = "alphabetic";
-    ctx.clearRect(-canvas.width / 2, -canvas.height / 2, 400, 70);
+    ctx.clearRect(-canvas.width / 2, -canvas.height / 2, 400, 100);
     ctx.fillText(text1, 10 - canvas.clientWidth / 2, 30 - canvas.clientHeight / 2);
     ctx.fillText(text2, 10 - canvas.clientWidth / 2, 60 - canvas.clientHeight / 2);
+    ctx.fillText(text3, 10 - canvas.clientWidth / 2, 90 - canvas.clientHeight / 2);
 
-    requestAnimationFrame(showStats)
+
+    // requestAnimationFrame(showStats)
 }
-setTimeout(() => showStats(), 0);
+// setTimeout(() => showStats(), 0);

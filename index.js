@@ -12,13 +12,26 @@ ctx.translate(canvas.clientWidth / 2, canvas.clientHeight / 2);
 
 let components = [];
 
-function draw(elapsedTime) {
-    if (elapsedTime == null) elapsedTime = 0;
+function drawOnce() {
     ctx.clearRect(-canvas.width / 2, -canvas.height / 2, canvas.width, canvas.height);
     drawBoardHoles();
+
     components.forEach(component => {
         component.draw();
     });
+    drawStats();
+}
+let drawLoop = false;
+function startDrawing() {
+    drawLoop = true;
+    keepDrawing();
+}
+function keepDrawing() {
+    drawOnce();
+    if (drawLoop) requestAnimationFrame(keepDrawing);
+}
+function stopDrawing() {
+    drawLoop = false;
 }
 
 class Component {
@@ -74,7 +87,7 @@ class Component {
             this.positionX = Math.ceil(this.positionX);
             this.positionY = Math.ceil(this.positionY);
         }
-        draw();
+        drawOnce();
     }
 
     destroy() {
@@ -82,7 +95,7 @@ class Component {
         this.storedList.forEach((component, index) => {
             if (component == this) {
                 this.storedList.splice(index, 1);
-                draw();
+                drawOnce();
                 return true;
             }
         });
@@ -97,8 +110,7 @@ class Chip extends Component {
         if (!this.pinNames) this.pinNames = [];
     }
     draw() {
-        ctx.fillStyle = "#222"
-        ctx.beginPath();
+        ctx.fillStyle = "#222";
         if (this.width > this.height) ctx.rect(getTranslatedCanvasX(this.positionX - 0.5), getTranslatedCanvasY(this.positionY + 0.1), this.width * zoom, (this.height - 0.2) * zoom);
         else ctx.rect(getTranslatedCanvasX(this.positionX + 0.1), getTranslatedCanvasY(this.positionY - 0.5), (this.width - 0.2) * zoom, this.height * zoom); //passe
         ctx.fill();
@@ -116,6 +128,7 @@ class Chip extends Component {
                 ctx.rect(getTranslatedCanvasX(this.positionX + i - pinWidth / 2), getTranslatedCanvasY(this.positionY + this.height - pinWidth / 2), pinWidth * zoom, pinWidth * zoom);
                 ctx.fill();
 
+                ctx.beginPath();
                 ctx.fillStyle = "#FFF"
                 if (this.pinNames[2 * this.width - i - 1]) ctx.fillText(this.pinNames[2 * this.width - i - 1], getTranslatedCanvasX(this.positionX + i), getTranslatedCanvasY(this.positionY + 0.7));
                 if (this.pinNames[i]) ctx.fillText(this.pinNames[i], getTranslatedCanvasX(this.positionX + i), getTranslatedCanvasY(this.positionY + this.height - 0.7));
@@ -129,6 +142,7 @@ class Chip extends Component {
                 ctx.rect(getTranslatedCanvasX(this.positionX + this.width - pinWidth / 2), getTranslatedCanvasY(this.positionY + j - pinWidth / 2), pinWidth * zoom, pinWidth * zoom);
                 ctx.fill();
 
+                ctx.beginPath();
                 ctx.fillStyle = "#FFF"
                 if (this.pinNames[j]) ctx.fillText(this.pinNames[j], getTranslatedCanvasX(this.positionX + 0.7), getTranslatedCanvasY(this.positionY + j));
                 if (this.pinNames[2 * this.height - j - 1]) ctx.fillText(this.pinNames[2 * this.height - j - 1], getTranslatedCanvasX(this.positionX + this.width - 0.7), getTranslatedCanvasY(this.positionY + j));
@@ -143,23 +157,3 @@ function getCanvasX(positionX) { return getTranslatedCanvasX(positionX) + canvas
 function getCanvasY(positionY) { return getTranslatedCanvasY(positionY) + canvas.clientHeight / 2 }
 
 
-function drawBoardHoles() {
-    visibleBoardWidth = hoveredPositionX(canvas.width) - hoveredPositionX(0);
-    visibleBoardHeight = hoveredPositionY(canvas.height) - hoveredPositionY(0);
-
-    ctx.fillStyle = "#000"
-    ctx.lineWidth = Math.round(0.1 * zoom);
-
-    let leftMostHolePosition = Math.floor(hoveredPositionX(0));
-    let topHolePosition = Math.floor(hoveredPositionY(0));
-    for (let i = 0; i <= visibleBoardWidth + 1; i++) {
-        let x = i + leftMostHolePosition;
-        let canvasX = getTranslatedCanvasX(x);
-        for (let j = 0; j <= visibleBoardHeight + 1; j++) {
-            let y = j + topHolePosition;
-            ctx.beginPath();
-            ctx.arc(canvasX, getTranslatedCanvasY(y), 0.12 * zoom, 0, Math.PI * 2)
-            ctx.fill();
-        }
-    }
-}
