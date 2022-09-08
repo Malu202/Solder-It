@@ -62,7 +62,16 @@ function drawBoardHoles() {
     // if (xOffset == 0) xOffset = 1;
     // if (yOffset == 0) yOffset = 1;
 
-    ctx.putImageData(boardImg, -xOffset, -yOffset);
+    // ctx.putImageData(boardImg, -xOffset, -yOffset);
+
+    // ctx.putImageData(boardImg, 0, 0, pixelsForOnePosition - xOffset, pixelsForOnePosition - yOffset, canvas.width, canvas.height);
+
+    // ctx.putImageData(boardImg, -pixelsForOnePosition * 2, -pixelsForOnePosition * 2, pixelsForOnePosition * 2, pixelsForOnePosition * 2, canvas.width, canvas.height);
+
+    ctx.putImageData(boardImg, -xOffset, -yOffset, xOffset, yOffset, canvas.width - 1, canvas.height - 1);
+
+    console.log(pixelsForOnePosition - xOffset)
+
 }
 
 function createBoardHoles() {
@@ -72,12 +81,9 @@ function createBoardHoles() {
 
     let pixelsForOnePosition = getTranslatedCanvasX(1) - getTranslatedCanvasX(0);
 
-    // holeImageCanvas.width = canvas.width + pixelsForOnePosition;
-    // holeImageCanvas.height = canvas.height + pixelsForOnePosition;
-    holeImageCanvas.width = canvas.width;
-    holeImageCanvas.height = canvas.height;
-    holeImageContext.fillStyle = "#000"
-    holeImageContext.lineWidth = 0.1 * zoom;
+    holeImageCanvas.width = canvas.width + pixelsForOnePosition * 1;
+    holeImageCanvas.height = canvas.height + pixelsForOnePosition * 1;
+
 
     visibleBoardWidth = hoveredPositionX(canvas.width) - hoveredPositionX(0);
     visibleBoardHeight = hoveredPositionY(canvas.height) - hoveredPositionY(0);
@@ -85,14 +91,22 @@ function createBoardHoles() {
 
     holeImageContext.clearRect(0, 0, holeImageCanvas.width, holeImageCanvas.height);
 
-    for (let i = 0; i <= visibleBoardWidth; i++) {
+    // holeImageContext.fillStyle = "#555";
+    // holeImageContext.rect(0, 0, holeImageCanvas.width, holeImageCanvas.height);
+    // holeImageContext.fill();
+
+    holeImageContext.fillStyle = "#000"
+    holeImageContext.lineWidth = 0.1 * zoom;
+
+    for (let i = 0; i <= visibleBoardWidth + 1; i++) {
         let x = i * pixelsForOnePosition;
-        for (let j = 0; j <= visibleBoardHeight; j++) {
+        for (let j = 0; j <= visibleBoardHeight + 1; j++) {
             let y = j * pixelsForOnePosition;
 
             holeImageContext.beginPath();
             holeImageContext.arc(x, y, 0.12 * zoom, 0, Math.PI * 2)
             holeImageContext.stroke();
+            // holeImageContext.fillText(i, x, y);
         }
     }
     boardImg = holeImageContext.getImageData(0, 0, holeImageCanvas.width, holeImageCanvas.height);
@@ -109,13 +123,8 @@ const downloadBoardImg = function () {
     dlCanvas.width = w;
     dlCanvas.height = h;
     let dlCtx = dlCanvas.getContext("2d");
-    dlCtx.putImageData(imageData, 0, 0);        // synchronous
+    dlCtx.putImageData(imageData, 0, 0);
 
-    // return new Promise((resolve) => {
-    //     canvas.toBlob(resolve); // implied image/png format
-
-
-    // });
     var link = document.createElement('a');
     link.download = 'test.png';
     link.href = dlCanvas.toDataURL()
