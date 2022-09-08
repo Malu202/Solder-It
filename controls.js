@@ -12,11 +12,15 @@ addEventListener('wheel', (event) => {
     zoomingDone = setTimeout(() => { if (!navigating) stopDrawing(); }, 1000);
     if (!drawLoop) startDrawing();
 
-    zoom *= 1 - (event.deltaY * 0.001);
-    zoom = Math.round(zoom);
-    zoomChanged = true;
+    let change = zoom * (event.deltaY * 0.001);
 
-    // drawOnce();
+    //if change is smaller than 0.5 it gets lost when rounding and nothing gets zoomed
+    if (Math.abs(change) <= 0.5) change = 1 * Math.sign(change);
+
+    zoom = Math.round(zoom - change);
+
+    if (zoom < 1) zoom = 1;
+    zoomChanged = true;
 });
 let startingNavigationX;
 let startingNavigationY;
