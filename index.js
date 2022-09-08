@@ -12,14 +12,20 @@ ctx.translate(canvas.clientWidth / 2, canvas.clientHeight / 2);
 
 let components = [];
 
+let zoomChanged = false;
 function drawOnce() {
     ctx.clearRect(-canvas.width / 2, -canvas.height / 2, canvas.width, canvas.height);
+
+    if (zoomChanged) {
+        createBoardHoles()
+        zoomChanged = false;
+    }
     drawBoardHoles();
 
     components.forEach(component => {
         component.draw();
     });
-    //drawStats();
+    drawStats();
 }
 let drawLoop = false;
 function startDrawing() {

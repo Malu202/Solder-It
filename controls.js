@@ -6,13 +6,17 @@ function hoveredPositionY(canvasY) {
 }
 
 let lastAnimationRequest;
+let zoomingDone;
 addEventListener('wheel', (event) => {
-    // if (lastAnimationRequest) window.cancelAnimationFrame(lastAnimationRequest)
+    clearTimeout(zoomingDone);
+    zoomingDone = setTimeout(() => { if (!navigating) stopDrawing(); }, 1000);
+    if (!drawLoop) startDrawing();
+
     zoom *= 1 - (event.deltaY * 0.001);
     zoom = Math.round(zoom);
-    createBoardHoles();
-    // requestAnimationFrame(drawOnce);
-    drawOnce();
+    zoomChanged = true;
+
+    // drawOnce();
 });
 let startingNavigationX;
 let startingNavigationY;

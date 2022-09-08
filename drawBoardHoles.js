@@ -101,13 +101,14 @@ function drawBoardHoles() {
 
 function createBoardHoles() {
 
+    console.log("creating Boardholes")
     let holeImageCanvas = document.createElement("canvas");
     let holeImageContext = holeImageCanvas.getContext("2d");
 
     let pixelsForOnePosition = zoom;
 
-    holeImageCanvas.width = canvas.width + pixelsForOnePosition * 1;
-    holeImageCanvas.height = canvas.height + pixelsForOnePosition * 1;
+    holeImageCanvas.width = canvas.width + pixelsForOnePosition * 2;
+    holeImageCanvas.height = canvas.height + pixelsForOnePosition * 2;
 
     visibleBoardWidth = hoveredPositionX(canvas.width) - hoveredPositionX(0);
     visibleBoardHeight = hoveredPositionY(canvas.height) - hoveredPositionY(0);
@@ -128,7 +129,8 @@ function drawOneHole(imageSize) {
     canv.width = imageSize;
     canv.height = imageSize;
 
-    cont.strokeStyle = "#000"
+    cont.strokeStyle = "#000";
+    cont.fillStyle = "#000";
     cont.lineWidth = 0.1 * zoom;
 
     cont.beginPath();
