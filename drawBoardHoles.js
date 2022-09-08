@@ -59,61 +59,93 @@ function drawBoardHoles() {
     let xOffset = (hoveredPositionX(0) % 1 + 1) * pixelsForOnePosition;
     let yOffset = (hoveredPositionY(0) % 1 + 1) * pixelsForOnePosition;
 
-    // if (xOffset == 0) xOffset = 1;
-    // if (yOffset == 0) yOffset = 1;
-
-    // ctx.putImageData(boardImg, -xOffset, -yOffset);
-
-    // ctx.putImageData(boardImg, 0, 0, pixelsForOnePosition - xOffset, pixelsForOnePosition - yOffset, canvas.width, canvas.height);
-
-    // ctx.putImageData(boardImg, -pixelsForOnePosition * 2, -pixelsForOnePosition * 2, pixelsForOnePosition * 2, pixelsForOnePosition * 2, canvas.width, canvas.height);
-
+    //canvas.width -1 because chrome doesn't draw anything if -1 is omitted
     ctx.putImageData(boardImg, -xOffset, -yOffset, xOffset, yOffset, canvas.width - 1, canvas.height - 1);
 
-    console.log(pixelsForOnePosition - xOffset)
+
 
 }
+
+//Draw all holes with arcs
+// function createBoardHoles1() {
+
+//     let holeImageCanvas = document.createElement("canvas");
+//     let holeImageContext = holeImageCanvas.getContext("2d");
+
+//     let pixelsForOnePosition = getTranslatedCanvasX(1) - getTranslatedCanvasX(0);
+
+//     holeImageCanvas.width = canvas.width + pixelsForOnePosition * 1;
+//     holeImageCanvas.height = canvas.height + pixelsForOnePosition * 1;
+
+//     visibleBoardWidth = hoveredPositionX(canvas.width) - hoveredPositionX(0);
+//     visibleBoardHeight = hoveredPositionY(canvas.height) - hoveredPositionY(0);
+
+//     holeImageContext.clearRect(0, 0, holeImageCanvas.width, holeImageCanvas.height);
+
+//     holeImageContext.fillStyle = "#000"
+//     holeImageContext.lineWidth = 0.1 * zoom;
+
+//     for (let i = 0; i <= visibleBoardWidth + 1; i++) {
+//         let x = i * pixelsForOnePosition;
+//         for (let j = 0; j <= visibleBoardHeight + 1; j++) {
+//             let y = j * pixelsForOnePosition;
+
+//             holeImageContext.beginPath();
+//             holeImageContext.arc(x, y, 0.12 * zoom, 0, Math.PI * 2);
+//             holeImageContext.stroke();
+//             // holeImageContext.fillText(i, x, y);
+//         }
+//     }
+//     boardImg = holeImageContext.getImageData(0, 0, holeImageCanvas.width, holeImageCanvas.height);
+// }
 
 function createBoardHoles() {
 
     let holeImageCanvas = document.createElement("canvas");
     let holeImageContext = holeImageCanvas.getContext("2d");
 
-    let pixelsForOnePosition = getTranslatedCanvasX(1) - getTranslatedCanvasX(0);
+    let pixelsForOnePosition = zoom;
 
     holeImageCanvas.width = canvas.width + pixelsForOnePosition * 1;
     holeImageCanvas.height = canvas.height + pixelsForOnePosition * 1;
-
 
     visibleBoardWidth = hoveredPositionX(canvas.width) - hoveredPositionX(0);
     visibleBoardHeight = hoveredPositionY(canvas.height) - hoveredPositionY(0);
 
 
+    let oneHole = drawOneHole(pixelsForOnePosition);
     holeImageContext.clearRect(0, 0, holeImageCanvas.width, holeImageCanvas.height);
 
-    // holeImageContext.fillStyle = "#555";
-    // holeImageContext.rect(0, 0, holeImageCanvas.width, holeImageCanvas.height);
-    // holeImageContext.fill();
+    let pattern = holeImageContext.createPattern(oneHole, "repeat");
+    holeImageContext.fillStyle = pattern;
+    holeImageContext.fillRect(0, 0, holeImageCanvas.width, holeImageCanvas.height);
 
-    holeImageContext.fillStyle = "#000"
-    holeImageContext.lineWidth = 0.1 * zoom;
-
-    for (let i = 0; i <= visibleBoardWidth + 1; i++) {
-        let x = i * pixelsForOnePosition;
-        for (let j = 0; j <= visibleBoardHeight + 1; j++) {
-            let y = j * pixelsForOnePosition;
-
-            holeImageContext.beginPath();
-            holeImageContext.arc(x, y, 0.12 * zoom, 0, Math.PI * 2)
-            holeImageContext.stroke();
-            // holeImageContext.fillText(i, x, y);
-        }
-    }
-    boardImg = holeImageContext.getImageData(0, 0, holeImageCanvas.width, holeImageCanvas.height);
-
+    boardImg = holeImageContext.getImageData(pixelsForOnePosition / 2, pixelsForOnePosition / 2, holeImageCanvas.width, holeImageCanvas.height);
 }
-createBoardHoles();
+function drawOneHole(imageSize) {
+    let canv = document.createElement("canvas");
+    let cont = canv.getContext("2d");
+    canv.width = imageSize;
+    canv.height = imageSize;
 
+    cont.strokeStyle = "#000"
+    cont.lineWidth = 0.1 * zoom;
+
+    cont.beginPath();
+    cont.arc(imageSize / 2, imageSize / 2, 0.12 * zoom, 0, Math.PI * 2)
+    cont.stroke();
+    return canv;
+}
+
+
+function zoomToggle() {
+    if (zoom < 8) zoom = 8;
+    else zoom = 7;
+    createBoardHoles();
+    drawOnce();
+    requestAnimationFrame(zoomToggle);
+}
+//setTimeout(zoomToggle, 1000);
 
 const downloadBoardImg = function () {
     let imageData = boardImg;
@@ -125,8 +157,13 @@ const downloadBoardImg = function () {
     let dlCtx = dlCanvas.getContext("2d");
     dlCtx.putImageData(imageData, 0, 0);
 
+    downloadCanvas(dlCanvas);
+}
+let downloadCanvas = function (dlCanvas) {
     var link = document.createElement('a');
     link.download = 'test.png';
     link.href = dlCanvas.toDataURL()
     link.click();
 }
+
+createBoardHoles();

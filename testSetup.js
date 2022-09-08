@@ -13,7 +13,7 @@ test4.positionY = -1;
 drawOnce();
 
 function drawStats() {
-    let text1 = `navigating: ${navigating}`
+    let text1 = `zoom: ${zoom}`
     let text2 = `movingComponent: ${movingComponent}`;
     let text3 = `drawLoop: ${drawLoop}`;
 

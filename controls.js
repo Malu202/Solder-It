@@ -9,6 +9,7 @@ let lastAnimationRequest;
 addEventListener('wheel', (event) => {
     // if (lastAnimationRequest) window.cancelAnimationFrame(lastAnimationRequest)
     zoom *= 1 - (event.deltaY * 0.001);
+    zoom = Math.round(zoom);
     createBoardHoles();
     // requestAnimationFrame(drawOnce);
     drawOnce();

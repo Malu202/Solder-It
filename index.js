@@ -19,7 +19,7 @@ function drawOnce() {
     components.forEach(component => {
         component.draw();
     });
-    drawStats();
+    //drawStats();
 }
 let drawLoop = false;
 function startDrawing() {
