@@ -16,7 +16,7 @@ function drawStats() {
     if (!drawLoop) filteredFPS = "-";
     let text1 = `zoom: ${zoom}`
     let text2 = `FPS: ${filteredFPS}`;
-    let text3 = `drawLoop: ${drawLoop}`;
+    let text3 = `cursor: ${cursorX}, ${cursorY}`;
 
     ctx.font = '24px serif';
     ctx.fillStyle = "#000";

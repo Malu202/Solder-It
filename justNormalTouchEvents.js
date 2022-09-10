@@ -53,8 +53,9 @@ function modifyEvent(event, modifications) {
     return newEvent
 }
 
+
 addEventListener("touchstart", (event) => {
-    let modifiedEvent = modifyEvent(event, { type: "mousedown", button: 0 })
+    let modifiedEvent = modifyEvent(event, { type: "mousedown", button: 1 })
     dispatchMouseEvent(modifiedEvent);
 });
 addEventListener("touchmove", (event) => {

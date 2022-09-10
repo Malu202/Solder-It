@@ -28,8 +28,6 @@ let navigating = false;
 let activeComponent = null;
 let movingComponent = null;
 addEventListener("mousedown", (event) => {
-    console.log("mousedown");
-    console.log(event.button)
     if (event.button == 1 || event.button == 2) {
         navigating = true;
         document.body.style.cursor = 'all-scroll';
@@ -42,11 +40,9 @@ addEventListener("mousedown", (event) => {
             }
         });
     }
-    console.log("calling start drawing");
     startDrawing();
 });
 addEventListener("mouseup", (event) => {
-    console.log("mouseup");
 
     if (navigating) {
         navigating = false;
@@ -60,9 +56,10 @@ addEventListener("mouseup", (event) => {
     }
     stopDrawing();
 })
+let cursorX, cursorY;
 addEventListener("mousemove", (event) => {
-    console.log("mousemove");
-
+    cursorX = event.clientX;
+    cursorY = event.clientY;
     if (navigating) {
         if (startingNavigationX == null) {
             startingNavigationX = event.clientX;
