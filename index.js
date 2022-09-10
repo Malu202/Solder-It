@@ -27,12 +27,26 @@ function drawOnce() {
     });
     drawStats();
 }
+
+
 let drawLoop = false;
 function startDrawing() {
     drawLoop = true;
     keepDrawing();
 }
-function keepDrawing() {
+
+let filterStrength = 10;
+let frameTime = 0, lastLoop = 0, thisLoop, filteredFPS;
+function keepDrawing(timestamp) {
+    if (timestamp) {
+        let thisFrameTime = (timestamp - lastLoop);
+        if (thisFrameTime > 0) {
+            frameTime += (thisFrameTime - frameTime) / filterStrength;
+            lastLoop = timestamp;
+            filteredFPS = Math.round(1000 / frameTime);
+        }
+    }
+
     drawOnce();
     if (drawLoop) requestAnimationFrame(keepDrawing);
 }

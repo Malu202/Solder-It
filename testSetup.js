@@ -13,8 +13,9 @@ test4.positionY = -1;
 drawOnce();
 
 function drawStats() {
+    if (!drawLoop) filteredFPS = "-";
     let text1 = `zoom: ${zoom}`
-    let text2 = `movingComponent: ${movingComponent}`;
+    let text2 = `FPS: ${filteredFPS}`;
     let text3 = `drawLoop: ${drawLoop}`;
 
     ctx.font = '24px serif';

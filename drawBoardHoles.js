@@ -100,8 +100,6 @@ function drawBoardHoles() {
 // }
 
 function createBoardHoles() {
-
-    //console.log("creating Boardholes")
     let holeImageCanvas = document.createElement("canvas");
     let holeImageContext = holeImageCanvas.getContext("2d");
 
