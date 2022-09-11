@@ -53,9 +53,14 @@ function modifyEvent(event, modifications) {
     return newEvent
 }
 
-let longpress;
+let longpress, pinchStartingLength;
 addEventListener("touchstart", (event) => {
     // longpress = setTimeout(() => handleLongtouch(event), 750)
+    if (event.touches.length == 2) {
+        pinchStartingLength = Math.hypot(event.touches[0].clientX - event.touches[1].clientX, event.touches[0].clientY - event.touches[1].clientY);
+        return;
+    }
+
     longpress = setTimeout(() => handleLongtouch(event), 490)
 
     let modifiedEvent = modifyEvent(event, { type: "mousedown", button: 1 })
@@ -63,8 +68,15 @@ addEventListener("touchstart", (event) => {
 });
 addEventListener("touchmove", (event) => {
     clearTimeout(longpress);
-    let modifiedEvent = modifyEvent(event, { type: "mousemove" })
-    dispatchMouseEvent(modifiedEvent);
+    if (event.touches.length == 2) {
+        let currentPinchLength = Math.hypot(event.touches[0].clientX - event.touches[1].clientX, event.touches[0].clientY - event.touches[1].clientY);
+        event.deltaY = currentPinchLength / pinchStartingLength;
+        let modifiedEvent = modifyEvent(event, { type: "wheel" })
+        dispatchMouseEvent(modifiedEvent);
+    } else {
+        let modifiedEvent = modifyEvent(event, { type: "mousemove" })
+        dispatchMouseEvent(modifiedEvent);
+    }
 });
 addEventListener("touchend", (event) => {
     clearTimeout(longpress);
