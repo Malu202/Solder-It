@@ -24,6 +24,13 @@ function dispatchMouseEvent(options) {
         target: document,
     };
 
+    if (options.hasOwnProperty("deltaX") || options.hasOwnProperty("deltaY") || options.hasOwnProperty("deltaZ")) {
+        opts.deltaX = 0;
+        opts.deltaY = 0;
+        opts.deltaZ = 0;
+        opts.sourceCapabilities = new InputDeviceCapabilities();
+    }
+
     //Merge the options with the defaults
     for (var key in options) {
         if (options.hasOwnProperty(key)) {
@@ -55,10 +62,9 @@ function modifyEvent(event, modifications) {
 
 let longpress, pinchStartingLength;
 addEventListener("touchstart", (event) => {
-    // longpress = setTimeout(() => handleLongtouch(event), 750)
     if (event.touches.length == 2) {
-        pinchStartingLength = Math.hypot(event.touches[0].clientX - event.touches[1].clientX, event.touches[0].clientY - event.touches[1].clientY);
-        return;
+        // pinchStartingLength = Math.hypot(event.touches[0].clientX - event.touches[1].clientX, event.touches[0].clientY - event.touches[1].clientY);
+        // return;
     }
 
     longpress = setTimeout(() => handleLongtouch(event), 490)
@@ -68,19 +74,22 @@ addEventListener("touchstart", (event) => {
 });
 addEventListener("touchmove", (event) => {
     clearTimeout(longpress);
-    if (event.touches.length == 2) {
-        let currentPinchLength = Math.hypot(event.touches[0].clientX - event.touches[1].clientX, event.touches[0].clientY - event.touches[1].clientY);
-        event.deltaY = currentPinchLength / pinchStartingLength;
-        let modifiedEvent = modifyEvent(event, { type: "wheel" })
-        dispatchMouseEvent(modifiedEvent);
-    } else {
-        let modifiedEvent = modifyEvent(event, { type: "mousemove" })
-        dispatchMouseEvent(modifiedEvent);
-    }
+    // if (event.touches.length == 2) {
+    //     let currentPinchLength = Math.hypot(event.touches[0].clientX - event.touches[1].clientX, event.touches[0].clientY - event.touches[1].clientY);
+    //     let scale = currentPinchLength / pinchStartingLength;
+    //     let modifiedEvent = modifyEvent(event, { type: "wheel", deltaY: scale })
+    //     dispatchMouseEvent(modifiedEvent);
+    // } else {
+    let modifiedEvent = modifyEvent(event, { type: "mousemove" })
+    dispatchMouseEvent(modifiedEvent);
+    // }
 });
 addEventListener("touchend", (event) => {
     clearTimeout(longpress);
-    let modifiedEvent = modifyEvent(event, { type: "mouseup", button: 1 })
+    let modifiedEvent;
+    if (longpress === true) modifiedEvent = modifyEvent(event, { type: "mouseup", button: 0 })
+    else modifiedEvent = modifyEvent(event, { type: "mouseup", button: 1 })
+    longpress = false;
     dispatchMouseEvent(modifiedEvent);
 });
 addEventListener("touchcancel", (event) => {
@@ -90,6 +99,7 @@ addEventListener("touchcancel", (event) => {
 function handleLongtouch(event) {
     let modifiedEvent = modifyEvent(event, { type: "mousedown", button: 0 });
     dispatchMouseEvent(modifiedEvent);
+    longpress = true;
 
     let modifiedEvent2 = modifyEvent(event, { type: "contextmenu" });
     dispatchMouseEvent(modifiedEvent2);

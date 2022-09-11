@@ -1,12 +1,12 @@
 
 let viewX = 0;
 let viewY = 0;
-let zoom = 25;
+let zoom = 35;
 
 let canvas = document.getElementById("canvas");
 let ctx = canvas.getContext("2d");
-canvas.width = canvas.clientWidth;
-canvas.height = canvas.clientHeight;
+canvas.width = canvas.clientWidth * (window.devicePixelRatio);
+canvas.height = canvas.clientHeight * (window.devicePixelRatio);
 ctx.save();
 ctx.translate(canvas.clientWidth / 2, canvas.clientHeight / 2);
 
