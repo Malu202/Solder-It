@@ -14,7 +14,7 @@ drawOnce();
 
 function drawStats() {
     if (!drawLoop) filteredFPS = "-";
-    let text1 = `zoom: ${zoom}`
+    let text1 = `movingComponent: ${movingComponent}`
     let text2 = `FPS: ${filteredFPS}`;
     let text3 = `cursor: ${cursorX}, ${cursorY}`;
 

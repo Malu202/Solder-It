@@ -56,8 +56,8 @@ let boardImg;
 //move one big image
 function drawBoardHoles() {
     let pixelsForOnePosition = getTranslatedCanvasX(1) - getTranslatedCanvasX(0);
-    let xOffset = (hoveredPositionX(0) % 1 + 1) * pixelsForOnePosition;
-    let yOffset = (hoveredPositionY(0) % 1 + 1) * pixelsForOnePosition;
+    let xOffset = (hoveredPositionX(0) % 1 + 1) * pixelsForOnePosition + 1;
+    let yOffset = (hoveredPositionY(0) % 1 + 1) * pixelsForOnePosition + 1;
 
     //canvas.width -1 because chrome doesn't draw anything if -1 is omitted
     ctx.putImageData(boardImg, -xOffset, -yOffset, xOffset, yOffset, canvas.width - 1, canvas.height - 1);

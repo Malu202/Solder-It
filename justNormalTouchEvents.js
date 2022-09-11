@@ -53,16 +53,33 @@ function modifyEvent(event, modifications) {
     return newEvent
 }
 
-
+let longpress;
 addEventListener("touchstart", (event) => {
+    // longpress = setTimeout(() => handleLongtouch(event), 750)
+    longpress = setTimeout(() => handleLongtouch(event), 490)
+
     let modifiedEvent = modifyEvent(event, { type: "mousedown", button: 1 })
     dispatchMouseEvent(modifiedEvent);
 });
 addEventListener("touchmove", (event) => {
+    clearTimeout(longpress);
     let modifiedEvent = modifyEvent(event, { type: "mousemove" })
     dispatchMouseEvent(modifiedEvent);
 });
 addEventListener("touchend", (event) => {
-    let modifiedEvent = modifyEvent(event, { type: "mouseup" })
+    clearTimeout(longpress);
+    let modifiedEvent = modifyEvent(event, { type: "mouseup", button: 1 })
     dispatchMouseEvent(modifiedEvent);
 });
+addEventListener("touchcancel", (event) => {
+    clearTimeout(longpress);
+});
+
+function handleLongtouch(event) {
+    let modifiedEvent = modifyEvent(event, { type: "mousedown", button: 0 });
+    dispatchMouseEvent(modifiedEvent);
+
+    let modifiedEvent2 = modifyEvent(event, { type: "contextmenu" });
+    dispatchMouseEvent(modifiedEvent2);
+
+}

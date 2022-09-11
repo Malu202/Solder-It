@@ -32,10 +32,12 @@ addEventListener("mousedown", (event) => {
         navigating = true;
         document.body.style.cursor = 'all-scroll';
     } else if (event.button == 0) {
+        stopNavigation()
         components.forEach(component => {
             if (component.isHovered(event.clientX, event.clientY)) {
                 movingComponent = component;
                 activeComponent = movingComponent;
+                // navigating = false;
                 return;
             }
         });
@@ -44,18 +46,21 @@ addEventListener("mousedown", (event) => {
 });
 addEventListener("mouseup", (event) => {
 
-    if (navigating) {
-        navigating = false;
-        startingNavigationX = null;
-        startingNavigationY = null;
-        document.body.style.cursor = 'default';
-    } else if (movingComponent) {
+    if (navigating && (event.button == 1 || event.button == 2)) {
+        stopNavigation()
+    } else if (movingComponent && event.button == 0) {
         movingComponent.putDown();
         movingComponent = null;
         document.body.style.cursor = 'pointer';
     }
-    stopDrawing();
+    if (!navigating && !movingComponent) stopDrawing();
 })
+function stopNavigation() {
+    navigating = false;
+    startingNavigationX = null;
+    startingNavigationY = null;
+    document.body.style.cursor = 'default';
+}
 let cursorX, cursorY;
 addEventListener("mousemove", (event) => {
     cursorX = event.clientX;
